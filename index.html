@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Campus Lost & Found — Demo</title>
+  <title>Campus Lost & Found </title>
   <link rel="stylesheet" href="https://unpkg.com/normalize.css/normalize.css" />
   <style>
     :root{
@@ -16,341 +16,217 @@
     header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
     h1{ margin:0; font-size:20px;}
     .container{ max-width:980px; margin:0 auto; }
-    .topbar{ display:flex; gap:12px; align-items:center; }
     .btn{ background:var(--accent); color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
     .btn.secondary{ background:#444; }
-    .layout{ display:grid; grid-template-columns: 1fr 360px; gap:16px; }
-    .card{ background:var(--card); padding:12px; border-radius:10px; box-shadow: 0 6px 18px rgba(20,20,40,0.06); }
+    .card{ background:var(--card); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(20,20,40,0.06); }
     form label{ display:block; font-weight:600; margin-top:8px; font-size:13px; }
-    form input[type="text"], form input[type="email"], form input[type="date"], form textarea, form select {
+    form input, form textarea, form select {
       width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; margin-top:6px; box-sizing:border-box;
     }
-    form textarea{ min-height:80px; resize:vertical; }
-    .cols{ display:flex; gap:8px; }
-    .small{ flex:1; }
-    .lists{ display:flex; flex-direction:column; gap:12px; }
-    .list-controls{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
-    .search{ flex:1; padding:8px; border-radius:8px; border:1px solid #ddd; }
     .item-grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
     .item-card{ background:#fff; padding:10px; border-radius:10px; box-shadow:0 6px 14px rgba(10,10,30,0.05); display:flex; gap:10px; align-items:flex-start; }
     .thumb{ width:72px; height:72px; background:#eee; border-radius:8px; object-fit:cover; }
     .meta{ flex:1; }
-    .meta h4{ margin:0 0 6px 0; font-size:15px; }
-    .muted{ color:var(--muted); font-size:13px; }
     .badge{ display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; color:#fff; }
     .badge.lost{ background:#d9534f; }
     .badge.found{ background:#5cb85c; }
-    .match{ display:block; margin-top:6px; background:#fff3cd; color:#6a5200; padding:6px; border-radius:6px; font-size:13px; }
     .small-muted{ font-size:12px; color:#666; margin-top:6px; }
     .empty{ color:#888; padding:18px; text-align:center; }
-    footer{ margin-top:18px; text-align:center; color:#666; font-size:13px; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>Campus Lost & Found — Demo</h1>
-      <div class="topbar">
-        <button class="btn" id="show-report">Report Item</button>
-        <button class="btn secondary" id="show-lists">View Items</button>
-      </div>
     </header>
 
-    <div class="layout">
-      <!-- LEFT: lists -->
-      <div>
-        <div class="card">
-          <div class="list-controls">
-            <input class="search" id="search" placeholder="Search items by name or description..." />
-            <select id="filterType" style="padding:8px;border-radius:8px;border:1px solid #ddd;">
-              <option value="all">All</option>
-              <option value="lost">Lost</option>
-              <option value="found">Found</option>
-            </select>
-            <button class="btn" id="refresh">Refresh</button>
-          </div>
-          <div style="margin-top:8px;" id="counts" class="small-muted">Loading items...</div>
+    <!-- Report Form -->
+    <div class="card">
+      <h3>Report Lost or Found</h3>
+      <form id="reportForm">
+        <label>Type</label>
+        <select id="type" required>
+          <option value="lost">Lost</option>
+          <option value="found">Found</option>
+        </select>
+
+        <label>Item Name</label>
+        <input id="itemName" type="text" required placeholder="e.g., Black wallet" />
+
+        <label>Description</label>
+        <textarea id="description" placeholder="Any details: brand, marks, contents..."></textarea>
+
+        <label>Contact (email or phone)</label>
+        <input id="contact" type="text" required placeholder="john@example.com or +2547..." />
+
+        <label>Photo (optional)</label>
+        <input id="photo" type="file" accept="image/*" />
+
+        <div style="margin-top:10px;">
+          <button class="btn" type="submit">Submit Report</button>
         </div>
-
-        <div style="height:12px"></div>
-
-        <div class="lists">
-          <div class="card">
-            <h3 style="margin-top:0;">Items</h3>
-            <div id="itemsContainer" class="item-grid">
-              <!-- item cards injected here -->
-            </div>
-            <div id="itemsEmpty" class="empty" style="display:none;">No items found.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: report form -->
-      <div>
-        <div class="card" id="reportCard">
-          <h3 style="margin-top:0;">Report Lost or Found</h3>
-          <form id="reportForm">
-            <label>Type</label>
-            <select id="type" required>
-              <option value="lost">Lost</option>
-              <option value="found">Found</option>
-            </select>
-
-            <label>Item Name</label>
-            <input id="itemName" type="text" required placeholder="e.g., Black wallet" />
-
-            <label>Description</label>
-            <textarea id="description" placeholder="Any details: brand, marks, contents..."></textarea>
-
-            <label>Location (where lost/found)</label>
-            <input id="location" type="text" placeholder="e.g., Library, Block A" />
-
-            <div class="cols">
-              <div class="small">
-                <label>Date</label>
-                <input id="date" type="date" />
-              </div>
-              <div class="small">
-                <label>Contact (email or phone)</label>
-                <input id="contact" type="text" placeholder="john@example.com or +2547..." required />
-              </div>
-            </div>
-
-            <label>Photo (optional)</label>
-            <input id="photo" type="file" accept="image/*" />
-
-            <div style="margin-top:10px;">
-              <button class="btn" type="submit">Submit Report</button>
-              <button type="button" id="clearForm" class="btn secondary">Clear</button>
-            </div>
-            <div id="formMsg" class="small-muted" style="margin-top:8px;"></div>
-          </form>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <div class="card">
-          <h3 style="margin-top:0;">How it works</h3>
-          <p class="small-muted">Students report lost/found items. When you post a found item, the system will flag possible matches with lost items (simple name-match). Contact info is visible in the item card so people can reconnect.</p>
-        </div>
-      </div>
+        <div id="formMsg" class="small-muted" style="margin-top:8px;"></div>
+      </form>
     </div>
 
-    <footer>Built with Firebase Realtime Database & Storage — Demo</footer>
+    <div style="height:12px"></div>
+
+    <!-- Items -->
+    <div class="card">
+      <h3>Items</h3>
+      <div id="itemsContainer" class="item-grid"></div>
+      <div id="itemsEmpty" class="empty" style="display:none;">No items found.</div>
+    </div>
   </div>
 
-  <!-- Firebase config (your project) -->
-  <script>
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyA6nAAc3sx9mkOapNSff7k1EFGkfbLN_o4",
-      authDomain: "smart-bin-b826f.firebaseapp.com",
-      databaseURL: "https://smart-bin-b826f-default-rtdb.firebaseio.com",
-      projectId: "smart-bin-b826f",
-      storageBucket: "smart-bin-b826f.firebasestorage.app",
-      messagingSenderId: "339092553035",
-      appId: "1:339092553035:web:9edfd5351f64d6cb563cce",
-      measurementId: "G-HN2LD86VWN"
-    };
-  </script>
-
-  <!-- Firebase compat SDKs -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
   <script>
-    // initialize
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAXak-lN_WmRe0CbN0UkwcwxTfayIE5FA0",
+      authDomain: "smartbin34.firebaseapp.com",
+      databaseURL: "https://smartbin34-default-rtdb.firebaseio.com",
+      projectId: "smartbin34",
+      storageBucket: "smartbin34.appspot.com",
+      messagingSenderId: "1098169082361",
+      appId: "1:1098169082361:web:87ce799868d755b4f11d28",
+      measurementId: "G-VEJY91T6CM"
+    };
+
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.database();
     const storage = firebase.storage();
 
-    // DOM refs
-    const reportForm = document.getElementById('reportForm');
-    const itemsContainer = document.getElementById('itemsContainer');
-    const itemsEmpty = document.getElementById('itemsEmpty');
-    const searchInput = document.getElementById('search');
-    const filterType = document.getElementById('filterType');
-    const countsEl = document.getElementById('counts');
-    const formMsg = document.getElementById('formMsg');
-    const refreshBtn = document.getElementById('refresh');
-    const showReport = document.getElementById('show-report');
-    const showLists = document.getElementById('show-lists');
+    const reportForm = document.getElementById("reportForm");
+    const itemsContainer = document.getElementById("itemsContainer");
+    const itemsEmpty = document.getElementById("itemsEmpty");
+    const formMsg = document.getElementById("formMsg");
 
-    let cachedItems = {}; // store items locally
+    // Compress image before upload
+    function compressImage(file, maxWidth, maxHeight, callback) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
 
-    // toggle to focus form or lists
-    showReport.onclick = ()=> window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
-    showLists.onclick = ()=> window.scrollTo({ top: 0, behavior:'smooth' });
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
 
-    // listen to DB changes
-    function subscribeItems(){
-      db.ref('items').on('value', snap => {
-        cachedItems = snap.val() || {};
-        renderItems();
-      });
-    }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
 
-    // helper: upload image (returns Promise of downloadURL or null)
-    function uploadImage(file){
-      if(!file) return Promise.resolve(null);
-      const path = 'images/' + Date.now() + '_' + file.name.replace(/\s+/g,'_');
-      const ref = storage.ref().child(path);
-      return ref.put(file).then(r => r.ref.getDownloadURL());
-    }
-
-    // create item id and push
-    function createItem(data){
-      const id = db.ref('items').push().key;
-      data.createdAt = Date.now();
-      return db.ref('items/' + id).set(data).then(()=> id);
-    }
-
-    // basic matching: check opposite-type items for name substring match
-    function findMatches(item){
-      const matches = [];
-      const targetName = (item.name || '').toLowerCase();
-      const oppositeType = item.type === 'lost' ? 'found' : 'lost';
-      for(const id in cachedItems){
-        const it = cachedItems[id];
-        if(it.type !== oppositeType) continue;
-        if(!it.name) continue;
-        const name = it.name.toLowerCase();
-        if(name.includes(targetName) || targetName.includes(name) || fuzzyMatch(name, targetName)){
-          matches.push({ id, ...it });
-        }
-      }
-      return matches;
-    }
-
-    // simple fuzzy: share token
-    function fuzzyMatch(a,b){
-      const ta = a.split(/\s+/);
-      const tb = b.split(/\s+/);
-      for(const x of ta) for(const y of tb) if(x && y && x===y) return true;
-      return false;
-    }
-
-    // render items
-    function renderItems(){
-      const q = (searchInput.value || '').trim().toLowerCase();
-      const typeFilter = filterType.value;
-      itemsContainer.innerHTML = '';
-      let count=0, lost=0, found=0;
-      for(const id in cachedItems){
-        const it = cachedItems[id];
-        if(it.type==='lost') lost++; else if(it.type==='found') found++;
-        // filter
-        if(typeFilter !== 'all' && it.type !== typeFilter) continue;
-        const text = (it.name + ' ' + (it.description||'') + ' ' + (it.location||'')).toLowerCase();
-        if(q && !text.includes(q)) continue;
-        // create card
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        const img = document.createElement('img');
-        img.className = 'thumb';
-        img.alt = it.name || '';
-        img.src = it.imageUrl || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><rect width="100%" height="100%" fill="%23eee"/></svg>';
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.innerHTML = `<h4>${escapeHtml(it.name || 'Unnamed')}</h4>
-                          <div class="muted">${escapeHtml(it.description || '')}</div>
-                          <div class="small-muted">Location: ${escapeHtml(it.location || 'Unknown')} • Date: ${it.date || '—'}</div>
-                          <div style="margin-top:8px"><span class="badge ${it.type==='lost' ? 'lost' : 'found'}">${it.type.toUpperCase()}</span></div>
-                          <div class="small-muted">Contact: ${escapeHtml(it.contact || '—')}</div>`;
-        // match suggestions
-        const matches = findMatches(it);
-        if(matches.length){
-          const matchDiv = document.createElement('div');
-          matchDiv.className = 'match';
-          matchDiv.textContent = `Possible matches (${matches.length}): ` + matches.map(m => `${m.name} (${m.location||'?'})`).join(' • ');
-          meta.appendChild(matchDiv);
-        }
-        // action: mark resolved (admin) or contact copy
-        const actionWrap = document.createElement('div');
-        actionWrap.style.marginTop = '8px';
-        const resolveBtn = document.createElement('button');
-        resolveBtn.className = 'btn secondary';
-        resolveBtn.textContent = 'Mark Resolved';
-        resolveBtn.onclick = ()=> {
-          const ok = confirm('Mark this item as resolved/removed?');
-          if(!ok) return;
-          db.ref('items/'+id).remove();
+          canvas.toBlob((blob) => {
+            callback(blob);
+          }, "image/jpeg", 0.7);
         };
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'btn';
-        copyBtn.style.marginLeft='8px';
-        copyBtn.textContent = 'Copy Contact';
-        copyBtn.onclick = ()=> {
-          navigator.clipboard?.writeText(it.contact || '').then(()=> alert('Contact copied to clipboard'));
-        };
-        actionWrap.appendChild(copyBtn);
-        actionWrap.appendChild(resolveBtn);
-        meta.appendChild(actionWrap);
-
-        card.appendChild(img);
-        card.appendChild(meta);
-        itemsContainer.appendChild(card);
-        count++;
-      }
-
-      countsEl.textContent = `Showing ${count} items — Total Lost: ${lost}, Found: ${found}`;
-      itemsEmpty.style.display = (count===0) ? 'block' : 'none';
+      };
     }
 
-    // simple HTML escape
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, (m)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    // Add item card to UI instantly
+    function addItemToUI(item) {
+      const card = document.createElement("div");
+      card.className = "item-card";
+      const img = document.createElement("img");
+      img.className = "thumb";
+      img.src = item.imageUrl || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72'><rect width='100%' height='100%' fill='%23eee'/></svg>";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `
+        <h4>${item.type.toUpperCase()}: ${item.name}</h4>
+        <div>${item.description || ""}</div>
+        <div class="small-muted">Contact: ${item.contact}</div>
+        <div class="badge ${item.type === "lost" ? "lost" : "found"}">${item.type}</div>
+      `;
+      card.appendChild(img);
+      card.appendChild(meta);
+      itemsContainer.prepend(card);
+      itemsEmpty.style.display = "none";
+    }
 
-    // submission flow
-    reportForm.onsubmit = async (e)=>{
+    // Submit form
+    reportForm.onsubmit = (e) => {
       e.preventDefault();
-      formMsg.textContent = '';
-      const type = document.getElementById('type').value;
-      const name = document.getElementById('itemName').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const location = document.getElementById('location').value.trim();
-      const date = document.getElementById('date').value;
-      const contact = document.getElementById('contact').value.trim();
-      const photoInput = document.getElementById('photo');
-      if(!name || !contact){ formMsg.textContent = 'Please enter item name and contact.'; return; }
-
-      formMsg.textContent = 'Uploading...';
+      formMsg.textContent = "Processing...";
+      const type = document.getElementById("type").value;
+      const name = document.getElementById("itemName").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const photoInput = document.getElementById("photo");
       const file = photoInput.files[0];
-      try {
-        const imageUrl = await uploadImage(file);
-        const data = {
-          type, name, description, location, date, contact, imageUrl: imageUrl || null
-        };
-        await createItem(data);
-        formMsg.textContent = 'Report submitted ✅';
-        reportForm.reset();
-        // quick re-render will happen via DB listener
-      } catch(err){
-        console.error(err);
-        formMsg.textContent = 'Error submitting report. Check console.';
+
+      if (!name || !contact) {
+        formMsg.textContent = "Please enter item name and contact.";
+        return;
       }
-      setTimeout(()=> formMsg.textContent = '', 3000);
+
+      const saveItem = (imageUrl) => {
+        const newItemRef = db.ref("items").push();
+        const data = { type, name, description, contact, imageUrl, createdAt: Date.now() };
+        newItemRef.set(data).then(() => {
+          formMsg.textContent = "Report submitted ✅";
+          addItemToUI(data);
+          reportForm.reset();
+          setTimeout(() => (formMsg.textContent = ""), 3000);
+        });
+      };
+
+      if (file) {
+        compressImage(file, 800, 800, (compressedBlob) => {
+          const path = "images/" + Date.now() + "_" + file.name.replace(/\s+/g, "_");
+          const ref = storage.ref().child(path);
+          const uploadTask = ref.put(compressedBlob);
+
+          uploadTask.on("state_changed",
+            (snap) => {
+              const progress = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+              formMsg.textContent = `Uploading... ${progress}%`;
+            },
+            (err) => {
+              console.error(err);
+              formMsg.textContent = "Upload failed.";
+            },
+            () => {
+              uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+                saveItem(url);
+              });
+            }
+          );
+        });
+      } else {
+        saveItem(null);
+      }
     };
 
-    // helpers: UI interactions
-    searchInput.oninput = renderItems;
-    filterType.onchange = renderItems;
-    refreshBtn.onclick = ()=> { renderItems(); };
-
-    // initialize and subscribe
-    subscribeItems();
-
-    // seed example items if none exist (helpful for demo)
-    db.ref('items').once('value').then(snap=>{
-      if(!snap.exists()){
-        const example = {
-          a1:{ type:'lost', name:'Black Wallet', description:'Leather, with student card', location:'Library', date:'2025-06-01', contact:'alice@example.com', imageUrl:null, createdAt:Date.now() },
-          a2:{ type:'found', name:'Wallet - black leather', description:'Found near library steps', location:'Library Steps', date:'2025-06-02', contact:'bob@example.com', imageUrl:null, createdAt:Date.now() },
-          a3:{ type:'lost', name:'Blue Umbrella', description:'Plastic handle', location:'Cafeteria', date:'2025-06-03', contact:'charles@example.com', imageUrl:null, createdAt:Date.now() }
-        };
-        db.ref('items').set(example);
+    // Subscribe to DB updates
+    db.ref("items").on("value", (snap) => {
+      itemsContainer.innerHTML = "";
+      if (!snap.exists()) {
+        itemsEmpty.style.display = "block";
+        return;
       }
+      itemsEmpty.style.display = "none";
+      const items = snap.val();
+      Object.values(items).forEach(addItemToUI);
     });
-
   </script>
 </body>
 </html>
