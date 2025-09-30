@@ -139,27 +139,25 @@
     <footer>Built with Firebase Realtime Database & Storage — Demo</footer>
   </div>
 
-  <!-- Firebase config (your project) -->
-  <script>
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyA6nAAc3sx9mkOapNSff7k1EFGkfbLN_o4",
-      authDomain: "smart-bin-b826f.firebaseapp.com",
-      databaseURL: "https://smart-bin-b826f-default-rtdb.firebaseio.com",
-      projectId: "smart-bin-b826f",
-      storageBucket: "smart-bin-b826f.firebasestorage.app",
-      messagingSenderId: "339092553035",
-      appId: "1:339092553035:web:9edfd5351f64d6cb563cce",
-      measurementId: "G-HN2LD86VWN"
-    };
-  </script>
-
   <!-- Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
   <script>
-    // initialize
+    // ✅ Your Firebase config (smartbin34 project)
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAXak-lN_WmRe0CbN0UkwcwxTfayIE5FA0",
+      authDomain: "smartbin34.firebaseapp.com",
+      databaseURL: "https://smartbin34-default-rtdb.firebaseio.com",
+      projectId: "smartbin34",
+      storageBucket: "smartbin34.appspot.com",
+      messagingSenderId: "1098169082361",
+      appId: "1:1098169082361:web:87ce799868d755b4f11d28",
+      measurementId: "G-VEJY91T6CM"
+    };
+
+    // Initialize Firebase
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.database();
     const storage = firebase.storage();
@@ -205,7 +203,7 @@
       return db.ref('items/' + id).set(data).then(()=> id);
     }
 
-    // basic matching: check opposite-type items for name substring match
+    // basic matching
     function findMatches(item){
       const matches = [];
       const targetName = (item.name || '').toLowerCase();
@@ -239,11 +237,10 @@
       for(const id in cachedItems){
         const it = cachedItems[id];
         if(it.type==='lost') lost++; else if(it.type==='found') found++;
-        // filter
         if(typeFilter !== 'all' && it.type !== typeFilter) continue;
         const text = (it.name + ' ' + (it.description||'') + ' ' + (it.location||'')).toLowerCase();
         if(q && !text.includes(q)) continue;
-        // create card
+
         const card = document.createElement('div');
         card.className = 'item-card';
         const img = document.createElement('img');
@@ -257,7 +254,7 @@
                           <div class="small-muted">Location: ${escapeHtml(it.location || 'Unknown')} • Date: ${it.date || '—'}</div>
                           <div style="margin-top:8px"><span class="badge ${it.type==='lost' ? 'lost' : 'found'}">${it.type.toUpperCase()}</span></div>
                           <div class="small-muted">Contact: ${escapeHtml(it.contact || '—')}</div>`;
-        // match suggestions
+
         const matches = findMatches(it);
         if(matches.length){
           const matchDiv = document.createElement('div');
@@ -265,7 +262,7 @@
           matchDiv.textContent = `Possible matches (${matches.length}): ` + matches.map(m => `${m.name} (${m.location||'?'})`).join(' • ');
           meta.appendChild(matchDiv);
         }
-        // action: mark resolved (admin) or contact copy
+
         const actionWrap = document.createElement('div');
         actionWrap.style.marginTop = '8px';
         const resolveBtn = document.createElement('button');
@@ -292,15 +289,12 @@
         itemsContainer.appendChild(card);
         count++;
       }
-
       countsEl.textContent = `Showing ${count} items — Total Lost: ${lost}, Found: ${found}`;
       itemsEmpty.style.display = (count===0) ? 'block' : 'none';
     }
 
-    // simple HTML escape
     function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, (m)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    // submission flow
     reportForm.onsubmit = async (e)=>{
       e.preventDefault();
       formMsg.textContent = '';
@@ -323,7 +317,6 @@
         await createItem(data);
         formMsg.textContent = 'Report submitted ✅';
         reportForm.reset();
-        // quick re-render will happen via DB listener
       } catch(err){
         console.error(err);
         formMsg.textContent = 'Error submitting report. Check console.';
@@ -331,15 +324,12 @@
       setTimeout(()=> formMsg.textContent = '', 3000);
     };
 
-    // helpers: UI interactions
     searchInput.oninput = renderItems;
     filterType.onchange = renderItems;
     refreshBtn.onclick = ()=> { renderItems(); };
 
-    // initialize and subscribe
     subscribeItems();
 
-    // seed example items if none exist (helpful for demo)
     db.ref('items').once('value').then(snap=>{
       if(!snap.exists()){
         const example = {
@@ -350,7 +340,6 @@
         db.ref('items').set(example);
       }
     });
-
   </script>
 </body>
 </html>
